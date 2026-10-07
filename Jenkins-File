@@ -1,0 +1,117 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = "three-env-app"
+        IMAGE_TAG = "${BUILD_NUMBER}"
+    }
+
+    stages {
+
+        stage('Code') {
+            steps {
+                echo 'Checking out source code'
+                git branch: 'main', url: 'https://github.com/ankanidileep/jenkins-three-env-pipeline.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo 'Building application'
+                sh 'ls -la'
+                sh 'ls -la app'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo 'Running tests'
+                sh 'test -f app/index.html'
+                sh 'test -f app/Dockerfile'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                    docker build \
+                    -t ${IMAGE_NAME}:${IMAGE_TAG} \
+                    ./app
+                '''
+            }
+        }
+
+        stage('Deploy DEV') {
+            steps {
+                sh '''
+                    docker rm -f dev-app || true
+
+                    docker run -d \
+                      --name dev-app \
+                      -p 8081:80 \
+                      ${IMAGE_NAME}:${IMAGE_TAG}
+                '''
+            }
+        }
+
+        stage('DEV Smoke Test') {
+            steps {
+                sh '''
+                    echo "Testing DEV..."
+                    curl -f http://localhost:8081
+                '''
+            }
+        }
+
+        stage('Deploy STAGING') {
+            steps {
+                sh '''
+                    docker rm -f staging-app || true
+
+                    docker run -d \
+                      --name staging-app \
+                      -p 8082:80 \
+                      ${IMAGE_NAME}:${IMAGE_TAG}
+                '''
+            }
+        }
+
+        stage('STAGING Smoke Test') {
+            steps {
+                sh '''
+                    echo "Testing STAGING..."
+                    curl -f http://localhost:8082
+                '''
+            }
+        }
+
+        stage('Production Approval') {
+            steps {
+                input message: 'Deploy this version to Production?',
+                      ok: 'Deploy to Production'
+            }
+        }
+
+        stage('Deploy PROD') {
+            steps {
+                sh '''
+                    docker rm -f prod-app || true
+
+                    docker run -d \
+                      --name prod-app \
+                      -p 8083:80 \
+                      ${IMAGE_NAME}:${IMAGE_TAG}
+                '''
+            }
+        }
+
+        stage('PROD Smoke Test') {
+            steps {
+                sh '''
+                    echo "Testing PRODUCTION..."
+                    curl -f http://localhost:8083
+                '''
+            }
+        }
+    }
+}
