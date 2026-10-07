@@ -1137,19 +1137,22 @@ This demonstrates a better understanding of CI/CD artifact promotion.
 
 # 32. Useful Jenkins Concepts
 
-| Concept        | Meaning                                      |       |                                                 |
-| -------------- | -------------------------------------------- | ----- | ----------------------------------------------- |
-| `agent any`    | Runs pipeline on an available Jenkins agent  |       |                                                 |
-| `environment`  | Defines reusable environment variables       |       |                                                 |
-| `BUILD_NUMBER` | Jenkins build identifier                     |       |                                                 |
-| `stage`        | Logical section of the pipeline              |       |                                                 |
-| `steps`        | Commands executed inside a stage             |       |                                                 |
-| `sh`           | Executes shell commands                      |       |                                                 |
-| `input`        | Manual approval                              |       |                                                 |
-| `docker build` | Creates Docker image                         |       |                                                 |
-| `docker run`   | Starts container                             |       |                                                 |
-| `curl -f`      | Performs HTTP check and fails on HTTP errors |       |                                                 |
-| `              |                                              | true` | Prevents cleanup command from failing the stage |
+# 32. Useful Jenkins Concepts
+
+| Concept        | Meaning                                                                                                                                              |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `agent any`    | Runs the pipeline on any available Jenkins agent that can execute the required steps.                                                                |
+| `environment`  | Defines reusable environment variables for the pipeline, such as `IMAGE_NAME` and `IMAGE_TAG`.                                                       |
+| `BUILD_NUMBER` | Jenkins-provided unique build identifier. In this project, it is used as the Docker image tag.                                                       |
+| `stage`        | Represents a logical section of the Jenkins pipeline, such as `Build`, `Test`, or `Deploy DEV`.                                                      |
+| `steps`        | Contains the commands or actions that Jenkins executes inside a stage.                                                                               |
+| `sh`           | Executes Linux shell commands on the Jenkins agent.                                                                                                  |
+| `input`        | Pauses the pipeline and waits for manual approval before continuing.                                                                                 |
+| `docker build` | Creates a Docker image from the Dockerfile and application files.                                                                                    |
+| `docker run`   | Creates and starts a Docker container from a Docker image.                                                                                           |
+| `curl -f`      | Sends an HTTP request and causes the command to fail when the HTTP response indicates an error.                                                      |
+| `\|\| true`    | Allows a command to return a failure without failing the Jenkins stage. In this project, it is used when removing old containers that may not exist. |
+
 
 ---
 
